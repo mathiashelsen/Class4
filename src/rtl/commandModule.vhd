@@ -71,7 +71,9 @@ process(clk, rst) begin
         TxReq           <= '0';
     elsif(clk'event and clk = '1') then
         prevUartStatus  <= uartStatus;
-        
+       
+
+        -- Basic ECHO implementation, if char received, tx it back -- 
         if(prevUartStatus(2) = '0' and uartStatus(2) = '1') then
             outputData  <=  inputData;
             TxReq       <= '1';
