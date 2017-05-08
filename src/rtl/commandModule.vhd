@@ -31,7 +31,7 @@ entity commandModule is
         clk     :   in  std_logic;
         rst     :   in  std_logic;
         RxD     :   in  std_logic;
-        TxD     :   out std_logic;
+        TxD     :   out std_logic
     );
 end entity;
 
@@ -62,13 +62,15 @@ begin
         TxD         =>  TxD,
         inputData   =>  outputData,
         outputData  =>  inputData,
-        uartStatus  =>  uartStatus
+        uartStatus  =>  uartStatus,
+        TxEn        =>  TxEn
     ); 
 
 process(clk, rst) begin
     if(rst = '1') then
-        prevUartStatus  <= to_unsigned(0, 32);
+        prevUartStatus  <= std_logic_vector(to_unsigned(0, 32));
         TxReq           <= '0';
+        TxEn            <= '0';
     elsif(clk'event and clk = '1') then
         prevUartStatus  <= uartStatus;
        

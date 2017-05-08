@@ -110,7 +110,7 @@ process(clk, rst) begin
         -- RX part
         -- The RX will oversample with a factor of 4 over the baud rate
         if( rxClkDivCtr = X"0000_0000" ) then
-            rxClkDivCtr     <= to_unsigned(0, 3) & clkDiv(31 downto 3);
+            rxClkDivCtr     <= to_unsigned(0, 2) & clkDiv(31 downto 2);
            
             if( inputBuffer(0) = '1' and inputBuffer(1) = '0' ) then
                 for i in 0 to 7 loop
