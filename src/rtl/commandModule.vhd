@@ -36,12 +36,22 @@ entity commandModule is
 end entity;
 
 architecture default of commandModule is
+    type states is (IDLE, 
+        RX_CMD_0, 
+        RX_CMD_1,
+        TX_ACK_0,
+        TX_ACK_1
+        );
+    signal FSM              :   states;
+
+    signal RxFlag           :   std_logic;
+
     signal TxEn             :   std_logic;
     signal TxReq            :   std_logic;
     signal inputData        :   std_logic_vector(7 downto 0);
     signal outputData       :   std_logic_vector(7 downto 0);
     signal uartStatus       :   std_logic_vector(31 downto 0);
-    signal prevUartStatus   :   std_logic_vector(31 downto 0);
+    signal cmdWord          :   std_logic_vector(23 downto 0);
     component uart 
         port(
         clk         : in    std_logic;          
@@ -68,25 +78,44 @@ begin
 
 process(clk, rst) begin
     if(rst = '1') then
-        prevUartStatus  <= std_logic_vector(to_unsigned(0, 32));
+        FSM             <= IDLE;
         TxReq           <= '0';
         TxEn            <= '0';
+        cmdWord         <= std_logic_vector(to_unsigned(0, 24));
     elsif(clk'event and clk = '1') then
-        prevUartStatus  <= uartStatus;
-       
+        RxFlag          <= uartStatus(2);
+        case FSM is
+            when IDLE =>
+                if(uartStatus(2) = '1' and RxFlag = '0') then
+                    FSM <= RX_CMD_0;
+                    cmdWord <= inputData & std_logic_vector(to_unsigned(0, 16));
+                end if;
+            when RX_CMD_0 =>
+                if(uartStatus(2) = '1' and RxFlag = '0') then
+                    FSM <= RX_CMD_1;
+                    cmdWord <= cmdWord(23 downto 16) & inputData 
+                        & std_logic_vector(to_unsigned(0, 8));
+                end if;
 
-        -- Basic ECHO implementation, if char received, tx it back -- 
-        if(prevUartStatus(2) = '0' and uartStatus(2) = '1') then
-            outputData  <=  inputData;
-            TxReq       <= '1';
-        end if;
+            when RX_CMD_1 =>
+                if(uartStatus(2) = '1' and RxFlag = '0') then
+                    FSM <= TX_ACK_0;
+                    cmdWord <= cmdWord(23 downto 8) & inputData;
+                end if;
 
-        if(TxReq = '1' and uartStatus(0) = '0') then
-            TxEn    <= '1';
-            TxReq   <= '0';
-        else
-            TxEn    <= '0';
-        end if;
+            when TX_ACK_0 =>
+                TxEn    <= '1';
+                outputData  <= std_logic_vector(to_unsigned(48, 8));
+                FSM     <= TX_ACK_1;
+
+            when TX_ACK_1 =>
+                TxEn    <= '0';
+                FSM     <= IDLE;
+
+            when others =>
+                FSM     <= IDLE;
+
+        end case;
     end if;
 
 end process;
