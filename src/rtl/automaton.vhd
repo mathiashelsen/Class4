@@ -45,7 +45,7 @@ entity automaton is
 end entity;
 
 architecture default of automaton is
-    signal  liveCells   : std_logic_vector(7 downto 0);
+    signal  liveCells   : unsigned(63 downto 0);
 begin
 
 -- Some very ugly code to do an 'OR' reduction
@@ -54,54 +54,11 @@ process(node_N_W, node_N, node_N_E,
     node_S_E, node_S, node_S_W,
     node_W
     ) begin
-
-    if(node_N_W != X"00") then
-        liveCells(0)    <= '1';
-    else
-        liveCells(0)    <= '0';
-    end if;
-
-    if(node_N != X"00") then
-        liveCells(1)    <= '1';
-    else
-        liveCells(1)    <= '0';
-    end if;
-
-    if(node_N_E != X"00") then
-        liveCells(2)    <= '1';
-    else
-        liveCells(2)    <= '0';
-    end if;
-
-    if(node_E != X"00") then
-        liveCells(3)    <= '1';
-    else
-        liveCells(3)    <= '0';
-    end if;
-
-    if(node_S_E != X"00") then
-        liveCells(4)    <= '1';
-    else
-        liveCells(4)    <= '0';
-    end if;
-
-    if(node_S != X"00") then
-        liveCells(5)    <= '1';
-    else
-        liveCells(5)    <= '0';
-    end if;
-
-    if(node_S_W != X"00") then
-        liveCells(6)    <= '1';
-    else
-        liveCells(6)    <= '0';
-    end if;
-
-    if(node_W != X"00") then
-        liveCells(7)    <= '1';
-    else
-        liveCells(7)    <= '0';
-    end if;
+    liveCells   <= unsigned(node_N_W)
+        + unsigned(node_N) + unsigned(node_N_E)
+        + unsigned(node_E) + unsigned(node_S_E)
+        + unsigned(node_S) + unsigned(node_S_W)
+        + unsigned(node_W)
 end process;
 
 process(clkAdvance, clkShift, rst) begin
