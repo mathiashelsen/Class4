@@ -52,7 +52,7 @@ architecture default of automaton is
     signal  liveCells   : unsigned(63 downto 0);
 begin
 
--- Some very ugly code to do an 'OR' reduction
+-- Some not-so-ugly code to do an 'OR' reduction
 process(node_N_W, node_N, node_N_E,
     node_E,
     node_S_E, node_S, node_S_W,
