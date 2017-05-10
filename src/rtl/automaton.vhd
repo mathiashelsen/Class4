@@ -26,6 +26,10 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
+
+--
+-- This automaton will implement Conway's Game of Life
+--
 entity automaton is
     port(
         clkAdvance      : in        std_logic;
@@ -58,16 +62,24 @@ process(node_N_W, node_N, node_N_E,
         + unsigned(node_N) + unsigned(node_N_E)
         + unsigned(node_E) + unsigned(node_S_E)
         + unsigned(node_S) + unsigned(node_S_W)
-        + unsigned(node_W)
+        + unsigned(node_W);
 end process;
 
 process(clkAdvance, clkShift, rst) begin
     if(rst = '1') then
         status      <= X"00";
     elsif(clkAdvance'event and clkAdvance = '1') then
-
+        if(liveCells < to_unsigned(2, 64)) then
+            status  <= X"00";
+        elsif(liveCells = to_unsigned(2, 64)) then
+            status  <= status;
+        elsif(liveCells = to_unsigned(3, 64)) then
+            status  <= X"01";
+        else
+            status  <= X"00";
+        end if;
     elsif(clkShift'event and clkShift = '1') then
-
+        status      <= node_N;
     end if;
-end
+end process;
 end architecture;
