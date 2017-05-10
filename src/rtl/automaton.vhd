@@ -40,7 +40,7 @@ entity automaton is
         node_S_E        : in        std_logic_vector(7 downto 0);
         node_S          : in        std_logic_vector(7 downto 0);
         node_S_W        : in        std_logic_vector(7 downto 0);
-        node_W          : in        std_logic_vector(7 downto 0);
+        node_W          : in        std_logic_vector(7 downto 0)
     );
 end entity;
 
