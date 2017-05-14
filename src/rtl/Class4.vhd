@@ -73,14 +73,14 @@ begin
         TxD     => GPIO_0(0) 
     );
 
-    genArray:   for i in 0 to N_Rows generate
-        genRows:    for j in 0 to N_Cols generate
+    genArray:   for i in 0 to N_Rows-1 generate
+        genRows:    for j in 0 to N_Cols-1 generate
             centerBlock: if (i > 0) 
                 and (j > 0) 
                 and i < (N_Rows-1) 
                 and j < (N_Cols-1) generate
                 node:   automaton port map(
-                    clkAdvance  => clkAdvance,
+                    clkAdvance  => FPGA_CLK1_50,
                     clkShift    => clkShift,
                     rst         => SW(0),
                     status      => automatonOut(i)(j),
@@ -96,6 +96,51 @@ begin
                     )
                 ); 
             end generate centerBlock;
+
+            centerLeft: if (i = 0) 
+                and (j > 0) 
+                and i < (N_Rows-1) 
+                and j < (N_Cols-1) generate
+                node:   automaton port map(
+                    clkAdvance  => FPGA_CLK1_50,
+                    clkShift    => clkShift,
+                    rst         => SW(0),
+                    status      => automatonOut(i)(j),
+                    inputs      => (
+                          automatonOut(i+1)(j)
+                        & automatonOut(i+1)(j+1)
+                        & automatonOut(i)  (j+1)
+                        & '0'
+                        & '0'
+                        & '0'
+                        & automatonOut(i)  (j-1)
+                        & automatonOut(i+1)(j-1)
+                    )
+                ); 
+            end generate centerLeft;
+
+            centerRight: if (i = 0) 
+                and (j > 0) 
+                and i < (N_Rows-1) 
+                and j < (N_Cols-1) generate
+                node:   automaton port map(
+                    clkAdvance  => FPGA_CLK1_50,
+                    clkShift    => clkShift,
+                    rst         => SW(0),
+                    status      => automatonOut(i)(j),
+                    inputs      => (
+                          automatonOut(i+1)(j)
+                        & automatonOut(i+1)(j+1)
+                        & automatonOut(i)  (j+1)
+                        & '0'
+                        & '0'
+                        & '0'
+                        & automatonOut(i)  (j-1)
+                        & automatonOut(i+1)(j-1)
+                    )
+                ); 
+            end generate centerRight;
         end generate genRows;
     end generate genArray;
+
 end architecture;
