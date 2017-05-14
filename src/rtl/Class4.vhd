@@ -35,16 +35,6 @@ entity Class4 is
 end entity;
 
 architecture default of Class4 is 
-    constant N_Rows : natural := 8;
-    constant N_Cols : natural := 8;
-
-    signal clkAdvance   : std_logic;
-    signal clkShift     : std_logic;
-
-    type matrix is array(N_Rows-1 downto 0) of 
-        std_logic_vector(N_Cols-1 downto 0);
-    signal automatonOut : matrix;
-
     component commandModule
     port(
         clk     :   in  std_logic;
@@ -54,16 +44,16 @@ architecture default of Class4 is
     );
     end component; 
 
-    component automaton
+    component array
     port(
-        clkAdvance      : in        std_logic;
-        clkShift        : in        std_logic;
-        rst             : in        std_logic;
-
-        status          : buffer    std_logic;
-        inputs          : in        std_logic_vector(7 downto 0)
+        clkAdvance  : in    std_logic;
+        clkShift    : in    std_logic;
+        rst         : in    std_logic;
+        inputData   : in    std_logic;
+        outputData  : out   std_logic;
     );
     end component;
+
     
 begin
     mainController : commandModule port map(
@@ -73,74 +63,9 @@ begin
         TxD     => GPIO_0(0) 
     );
 
-    genArray:   for i in 0 to N_Rows-1 generate
-        genRows:    for j in 0 to N_Cols-1 generate
-            centerBlock: if (i > 0) 
-                and (j > 0) 
-                and i < (N_Rows-1) 
-                and j < (N_Cols-1) generate
-                node:   automaton port map(
-                    clkAdvance  => FPGA_CLK1_50,
-                    clkShift    => clkShift,
-                    rst         => SW(0),
-                    status      => automatonOut(i)(j),
-                    inputs      => (
-                          automatonOut(i+1)(j)
-                        & automatonOut(i+1)(j+1)
-                        & automatonOut(i)  (j+1)
-                        & automatonOut(i-1)(j+1)
-                        & automatonOut(i-1)(j)
-                        & automatonOut(i-1)(j-1)
-                        & automatonOut(i)  (j-1)
-                        & automatonOut(i+1)(j-1)
-                    )
-                ); 
-            end generate centerBlock;
+    mainArray       : array port map(
+        -- TODO
+    );
 
-            centerLeft: if (i = 0) 
-                and (j > 0) 
-                and i < (N_Rows-1) 
-                and j < (N_Cols-1) generate
-                node:   automaton port map(
-                    clkAdvance  => FPGA_CLK1_50,
-                    clkShift    => clkShift,
-                    rst         => SW(0),
-                    status      => automatonOut(i)(j),
-                    inputs      => (
-                          automatonOut(i+1)(j)
-                        & automatonOut(i+1)(j+1)
-                        & automatonOut(i)  (j+1)
-                        & '0'
-                        & '0'
-                        & '0'
-                        & automatonOut(i)  (j-1)
-                        & automatonOut(i+1)(j-1)
-                    )
-                ); 
-            end generate centerLeft;
-
-            centerRight: if (i = 0) 
-                and (j > 0) 
-                and i < (N_Rows-1) 
-                and j < (N_Cols-1) generate
-                node:   automaton port map(
-                    clkAdvance  => FPGA_CLK1_50,
-                    clkShift    => clkShift,
-                    rst         => SW(0),
-                    status      => automatonOut(i)(j),
-                    inputs      => (
-                          automatonOut(i+1)(j)
-                        & automatonOut(i+1)(j+1)
-                        & automatonOut(i)  (j+1)
-                        & '0'
-                        & '0'
-                        & '0'
-                        & automatonOut(i)  (j-1)
-                        & automatonOut(i+1)(j-1)
-                    )
-                ); 
-            end generate centerRight;
-        end generate genRows;
-    end generate genArray;
 
 end architecture;
