@@ -36,20 +36,20 @@ entity automaton is
         clkShift        : in        std_logic;
         rst             : in        std_logic;
 
-        status          : buffer    std_logic_vector(7 downto 0);
-        node_N_W        : in        std_logic_vector(7 downto 0);
-        node_N          : in        std_logic_vector(7 downto 0);
-        node_N_E        : in        std_logic_vector(7 downto 0);
-        node_E          : in        std_logic_vector(7 downto 0);
-        node_S_E        : in        std_logic_vector(7 downto 0);
-        node_S          : in        std_logic_vector(7 downto 0);
-        node_S_W        : in        std_logic_vector(7 downto 0);
-        node_W          : in        std_logic_vector(7 downto 0)
+        status          : buffer    std_logic;
+        node_N_W        : in        std_logic;
+        node_N          : in        std_logic;
+        node_N_E        : in        std_logic;
+        node_E          : in        std_logic;
+        node_S_E        : in        std_logic;
+        node_S          : in        std_logic;
+        node_S_W        : in        std_logic;
+        node_W          : in        std_logic
     );
 end entity;
 
 architecture default of automaton is
-    signal  liveCells   : unsigned(63 downto 0);
+    signal  liveCells   : unsigned(7 downto 0);
 begin
 
 -- Some not-so-ugly code to do an 'OR' reduction
@@ -69,11 +69,11 @@ process(clkAdvance, clkShift, rst) begin
     if(rst = '1') then
         status      <= X"00";
     elsif(clkAdvance'event and clkAdvance = '1') then
-        if(liveCells < to_unsigned(2, 64)) then
+        if(liveCells < to_unsigned(2, 8)) then
             status  <= X"00";
-        elsif(liveCells = to_unsigned(2, 64)) then
+        elsif(liveCells = to_unsigned(2, 8)) then
             status  <= status;
-        elsif(liveCells = to_unsigned(3, 64)) then
+        elsif(liveCells = to_unsigned(3, 8)) then
             status  <= X"01";
         else
             status  <= X"00";
