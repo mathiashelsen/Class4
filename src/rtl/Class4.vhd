@@ -30,7 +30,7 @@ entity Class4 is
     port(
         FPGA_CLK1_50    : in    std_logic;
         SW              : in    std_logic_vector(2 downto 0);
-        GPIO_0          : inout std_logic_vector(31 downto 0);
+        GPIO_0          : inout std_logic_vector(31 downto 0)
     );
 end entity;
 
@@ -43,6 +43,16 @@ architecture default of Class4 is
         TxD     :   out std_logic
     );
     end component; 
+
+    port(
+        clkAdvance      : in        std_logic;
+        clkShift        : in        std_logic;
+        rst             : in        std_logic;
+
+        status          : buffer    std_logic;
+        inputs          : in        std_logic_vector(7 downto 0)
+    );
+    
 begin
     mainController : commandModule port map(
         clk     => FPGA_CLK1_50,

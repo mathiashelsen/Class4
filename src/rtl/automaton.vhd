@@ -37,14 +37,7 @@ entity automaton is
         rst             : in        std_logic;
 
         status          : buffer    std_logic;
-        node_N_W        : in        std_logic;
-        node_N          : in        std_logic;
-        node_N_E        : in        std_logic;
-        node_E          : in        std_logic;
-        node_S_E        : in        std_logic;
-        node_S          : in        std_logic;
-        node_S_W        : in        std_logic;
-        node_W          : in        std_logic
+        inputs          : in        std_logic_vector(7 downto 0)
     );
 end entity;
 
@@ -53,33 +46,30 @@ architecture default of automaton is
 begin
 
 -- Some not-so-ugly code to do an 'OR' reduction
-process(node_N_W, node_N, node_N_E,
-    node_E,
-    node_S_E, node_S, node_S_W,
-    node_W
-    ) begin
-    liveCells   <= unsigned(node_N_W)
-        + unsigned(node_N) + unsigned(node_N_E)
-        + unsigned(node_E) + unsigned(node_S_E)
-        + unsigned(node_S) + unsigned(node_S_W)
-        + unsigned(node_W);
+process( inputs ) is
+    variable tmp : integer range 0 to 7 := 0;
+begin
+    for i in inputs'range loop
+        tmp     := tmp + to_integer(unsigned(inputs(i downto i)));
+    end loop;
+    liveCells   <= to_unsigned(tmp, 8);
 end process;
 
 process(clkAdvance, clkShift, rst) begin
     if(rst = '1') then
-        status      <= X"00";
+        status      <= '0';
     elsif(clkAdvance'event and clkAdvance = '1') then
         if(liveCells < to_unsigned(2, 8)) then
-            status  <= X"00";
+            status  <= '0';
         elsif(liveCells = to_unsigned(2, 8)) then
             status  <= status;
         elsif(liveCells = to_unsigned(3, 8)) then
-            status  <= X"01";
+            status  <= '1';
         else
-            status  <= X"00";
+            status  <= '0';
         end if;
     elsif(clkShift'event and clkShift = '1') then
-        status      <= node_N;
+        status      <= inputs(0);
     end if;
 end process;
 end architecture;
