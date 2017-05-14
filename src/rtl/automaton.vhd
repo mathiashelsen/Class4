@@ -55,21 +55,23 @@ begin
     liveCells   <= to_unsigned(tmp, 8);
 end process;
 
-process(clkAdvance, clkShift, rst) begin
+process(clkAdvance, rst) begin
     if(rst = '1') then
         status      <= '0';
-    elsif(clkAdvance'event and clkAdvance = '1') then
-        if(liveCells < to_unsigned(2, 8)) then
-            status  <= '0';
-        elsif(liveCells = to_unsigned(2, 8)) then
-            status  <= status;
-        elsif(liveCells = to_unsigned(3, 8)) then
-            status  <= '1';
+    elsif(clkAdvance'event and clkAdvance ='1') then
+        if( clkShift = '1') then
+            status      <= inputs(0);
         else
-            status  <= '0';
+            if(liveCells < to_unsigned(2, 8)) then
+                status  <= '0';
+            elsif(liveCells = to_unsigned(2, 8)) then
+                status  <= status;
+            elsif(liveCells = to_unsigned(3, 8)) then
+                status  <= '1';
+            else
+                status  <= '0';
+            end if;
         end if;
-    elsif(clkShift'event and clkShift = '1') then
-        status      <= inputs(0);
     end if;
 end process;
 end architecture;
