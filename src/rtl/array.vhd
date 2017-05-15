@@ -86,6 +86,29 @@ architecture default of array is
                     )
                 ); 
             end generate centerBlock;
+
+            -- Top center
+            topCenterBlock: if (i > 0) 
+                and i < (N_Rows-1) 
+                and j = (N_Cols-1) generate
+                node:   automaton port map(
+                    clk         => clk,
+                    advance     => advance,
+                    shift       => shiftDown,
+                    rst         => SW(0),
+                    status      => automatonOut(i)(j),
+                    inputs      => (
+                          topShiftReg(j)        --automatonOut(i+1)(j)
+                        & topShiftReg(j+1)      --automatonOut(i+1)(j+1)
+                        & automatonOut(i)  (j+1)
+                        & automatonOut(i-1)(j+1)
+                        & automatonOut(i-1)(j)
+                        & automatonOut(i-1)(j-1)
+                        & automatonOut(i)  (j-1)
+                        & topShiftReg(j-1)      -- automatonOut(i+1)(j-1)
+                    )
+                ); 
+            end generate topCenterBlock;
 begin
 
 process(clk) begin
