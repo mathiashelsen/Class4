@@ -71,7 +71,7 @@ architecture default of array is
                 node:   automaton port map(
                     clk         => clk,
                     advance     => advance,
-                    shift       => shift,
+                    shift       => shiftDown,
                     rst         => SW(0),
                     status      => automatonOut(i)(j),
                     inputs      => (
@@ -87,5 +87,20 @@ architecture default of array is
                 ); 
             end generate centerBlock;
 begin
+
+process(clk) begin
+    if(clk'event and clk = '1') then
+        if( shiftRight = '1' ) then
+            -- Shift to the right, cell (0, y) is rightmost
+            -- Copy from bottom shift register to the output
+            botShiftReg <= '0' & botShiftReg(NCols-1 downto 1);
+            outputData  <= botShiftReg(0);
+            -- Copy from the input to the top shift register 
+            topShiftReg <= inputData & topShiftReg(NCols-1 downto 1);
+        elsif( shiftDown = '1') then
+            botShiftReg <= automatonOut(0);
+        end if;
+    end if;
+end process;
 
 end architecture;
