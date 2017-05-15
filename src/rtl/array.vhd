@@ -28,8 +28,10 @@ use ieee.numeric_std.all;
 
 entity array is
     port(
-        clkAdvance  : in    std_logic;
-        clkShift    : in    std_logic;
+        clk         : in    std_logic;
+        advance     : in    std_logic;
+        shiftDown   : in    std_logic;
+        shiftRight  : in    std_logic;
         rst         : in    std_logic;
         inputData   : in    std_logic;
         outputData  : out   std_logic;
@@ -44,10 +46,14 @@ architecture default of array is
         std_logic_vector(N_Cols-1 downto 0);
     signal automatonOut : matrix;
 
+    signal topShiftReg  : std_logic_vector(N_Cols-1 downto 0);
+    signal botShiftReg  : std_logic_vector(N_Cols-1 downto 0);
+
     component automaton
     port(
-        clkAdvance      : in        std_logic;
-        clkShift        : in        std_logic;
+        clk             : in        std_logic;
+        advance         : in        std_logic;
+        shift           : in        std_logic;
         rst             : in        std_logic;
 
         status          : buffer    std_logic;
@@ -57,13 +63,15 @@ architecture default of array is
 
     genArray:   for i in 0 to N_Rows-1 generate
         genRows:    for j in 0 to N_Cols-1 generate
+            -- Center center, no edges 
             centerBlock: if (i > 0) 
                 and (j > 0) 
                 and i < (N_Rows-1) 
                 and j < (N_Cols-1) generate
                 node:   automaton port map(
-                    clkAdvance  => clkAdvance,
-                    clkShift    => clkShift,
+                    clk         => clk,
+                    advance     => advance,
+                    shift       => shift,
                     rst         => SW(0),
                     status      => automatonOut(i)(j),
                     inputs      => (
@@ -78,52 +86,6 @@ architecture default of array is
                     )
                 ); 
             end generate centerBlock;
-
-            centerLeft: if (i = 0) 
-                and (j > 0) 
-                and i < (N_Rows-1) 
-                and j < (N_Cols-1) generate
-                node:   automaton port map(
-                    clkAdvance  => clkAdvance,
-                    clkShift    => clkShift,
-                    rst         => SW(0),
-                    status      => automatonOut(i)(j),
-                    inputs      => (
-                          automatonOut(i+1)(j)
-                        & automatonOut(i+1)(j+1)
-                        & automatonOut(i)  (j+1)
-                        & '0'
-                        & '0'
-                        & '0'
-                        & automatonOut(i)  (j-1)
-                        & automatonOut(i+1)(j-1)
-                    )
-                ); 
-            end generate centerLeft;
-
-            centerRight: if (i = 0) 
-                and (j > 0) 
-                and i < (N_Rows-1) 
-                and j < (N_Cols-1) generate
-                node:   automaton port map(
-                    clkAdvance  => clkAdvance,
-                    clkShift    => clkShift,
-                    rst         => SW(0),
-                    status      => automatonOut(i)(j),
-                    inputs      => (
-                          automatonOut(i+1)(j)
-                        & automatonOut(i+1)(j+1)
-                        & automatonOut(i)  (j+1)
-                        & '0'
-                        & '0'
-                        & '0'
-                        & automatonOut(i)  (j-1)
-                        & automatonOut(i+1)(j-1)
-                    )
-                ); 
-            end generate centerRight;
-        end generate genRows;
-    end generate genArray;
 begin
 
 end architecture;

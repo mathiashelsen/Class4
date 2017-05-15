@@ -32,8 +32,9 @@ use ieee.numeric_std.all;
 --
 entity automaton is
     port(
-        clkAdvance      : in        std_logic;
-        clkShift        : in        std_logic;
+        clk             : in        std_logic;
+        advance         : in        std_logic;
+        shift           : in        std_logic;
         rst             : in        std_logic;
 
         status          : buffer    std_logic;
@@ -58,10 +59,10 @@ end process;
 process(clkAdvance, rst) begin
     if(rst = '1') then
         status      <= '0';
-    elsif(clkAdvance'event and clkAdvance ='1') then
-        if( clkShift = '1') then
+    elsif(clk'event and clk ='1') then
+        if( shift = '1') then
             status      <= inputs(0);
-        else
+        elsif( advance = '1' ) 
             if(liveCells < to_unsigned(2, 8)) then
                 status  <= '0';
             elsif(liveCells = to_unsigned(2, 8)) then
